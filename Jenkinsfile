@@ -1,43 +1,63 @@
+@Library('mylibrary')_
 pipeline
 {
     agent any
     stages
     {
-        stage('ContDownload')
+        stage('contdownload_master')
         {
             steps
             {
-                git 'https://github.com/Prasanth812512/maven.git'
+                script
+                {
+                    cicd.gitDownload("maven")
+                }
             }
         }
-        stage('ContBuild')
+        stage('contbuild_master')
         {
             steps
             {
-                sh 'mvn package'
+                script
+                {
+                    cicd.mavenBuild()
+                }
             }
         }
-        stage('ContDeployment')
+        stage('contdeployment_master')
         {
             steps
             {
-                deploy adapters: [tomcat9(credentialsId: '2cd68205-157a-433e-9da7-2015779c46f0', path: '', url: 'http://172.31.47.254:8080')], contextPath: 'mytestapp', war: '**/*.war'
+                script
+                {
+                    cicd.deployTomcat("DeclarativePipelinewithSharedLibraries","172.31.47.254","testapp")
+                }
             }
         }
-        stage('ContTesting')
+        stage('conttesting_master')
         {
             steps
             {
-                git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+                script
+                {
+                    cicd.gitDownload("FunctionalTesting")
+                    cicd.runSelenium("DeclarativePipelinewithSharedLibraries")
+                }
+            }
+        }
+        stage('contdelivery_master')
+        {
+            steps
+            {
+                script
+                {
+                    
+                        
+                    
+                    cicd.deployTomcat("DeclarativePipelinewithSharedLibraries","172.31.43.234","prodapp")
+                  
             
-                sh 'java -jar  /var/lib/jenkins/workspace/DeclarativePipeline1/testing.jar'
-            }
-        }
-        stage('ContDelivery')
-        {
-            steps
-            {
-                deploy adapters: [tomcat9(credentialsId: '2cd68205-157a-433e-9da7-2015779c46f0', path: '', url: 'http://172.31.43.234:8080')], contextPath: 'myprodapp', war: '**/*.war'
+                }
             }
         }
     }
