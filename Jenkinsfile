@@ -1,64 +1,35 @@
-@Library('mylibrary')_
-pipeline
-{
-    agent any
-    stages
-    {
-        stage('contdownload_master')
-        {
-            steps
-            {
-                script
-                {
-                    cicd.gitDownload("maven")
-                }
-            }
-        }
-        stage('contbuild_master')
-        {
-            steps
-            {
-                script
-                {
-                    cicd.mavenBuild()
-                }
-            }
-        }
-        stage('contdeployment_master')
-        {
-            steps
-            {
-                script
-                {
-                    cicd.deployTomcat("DeclarativePipelinewithSharedLibraries","172.31.47.254","testapp")
-                }
-            }
-        }
-        stage('conttesting_master')
-        {
-            steps
-            {
-                script
-                {
-                    cicd.gitDownload("FunctionalTesting")
-                    cicd.runSelenium("DeclarativePipelinewithSharedLibraries")
-                }
-            }
-        }
-        stage('contdelivery_master')
-        {
-            steps
-            {
-                script
-                {
-                    
-                        
-                    
-                    cicd.deployTomcat("DeclarativePipelinewithSharedLibraries","172.31.43.234","prodapp")
-                  
-            
-                }
-            }
-        }
+pipeline {
+    agent { label 'Jenkins-Agent' }
+    tools {
+        jdk 'Java17'
+        maven 'Maven3'
     }
-}
+   
+    stages{
+        stage("Cleanup Workspace"){
+                steps {
+                cleanWs()
+                }
+        }
+
+        stage("Checkout from SCM"){
+                steps {
+                    git branch: 'main', credentialsId: 'github', url: 'https://github.com/Prasanth812512/maven.git'
+                }
+        }
+
+        stage("Build Application"){
+            steps {
+                sh "mvn clean package"
+            }
+
+       }
+
+       stage("Test Application"){
+           steps {
+                 sh "mvn test"
+           }
+       }
+	   
+	   }
+	   }
